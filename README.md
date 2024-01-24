@@ -48,7 +48,7 @@ import { createVal } from '@vyke/val'
 const index = createVal(1)
 //      ^? number
 // Type infered by default or manually
-const counter = createVal<1| 2 | 3 | 4>(1)
+const counter = createVal<1 | 2 | 3 | 4>(1)
 ```
 
 ### get
@@ -103,7 +103,7 @@ watch((name, age) => {
 Create a new val using one or more val to base from, similar to a computed function
 
 ```ts
-import { createVal, select} from '@vyke/val'
+import { createVal, select } from '@vyke/val'
 
 const val = createVal(1)
 const plusOne = select((value) => {
