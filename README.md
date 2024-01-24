@@ -45,10 +45,10 @@ Create a new val
 ```ts
 import { createVal } from '@vyke/val'
 
-const index = createVal(1);
+const index = createVal(1)
 //      ^? number
 // Type infered by default or manually
-const counter = createVal<1| 2 | 3 | 4>(1);
+const counter = createVal<1| 2 | 3 | 4>(1)
 ```
 
 ### get
@@ -57,8 +57,8 @@ returns the value of a val
 ```ts
 import { createVal, get } from '@vyke/val'
 
-const index = createVal(1);
-console.log(get(index));
+const index = createVal(1)
+console.log(get(index))
 ```
 
 ### set
@@ -68,12 +68,12 @@ sets the value of a val
 ```ts
 import { createVal, get, set } from '@vyke/val'
 
-const index = createVal(1);
-console.log(get(index));
+const index = createVal(1)
+console.log(get(index))
 
 set(index, 2)
 
-console.log(get(index));
+console.log(get(index))
 ```
 
 ### getValues
@@ -81,6 +81,7 @@ Similar to the get function but for multiple vals at once
 
 ```ts
 import { createVal, getValues } from '@vyke/val'
+
 const nameVal = createVal('Jose')
 const ageVal = createVal(15)
 const [name, age] = getValues(nameVal, ageVal)
@@ -94,7 +95,7 @@ import { createVal, watch } from '@vyke/val'
 const nameVal = createVal('Jose')
 const ageVal = createVal(15)
 watch((name, age) => {
-  console.log(name, age)
+	console.log(name, age)
 }, nameVal, ageVal)
 ```
 
@@ -104,9 +105,9 @@ Create a new val using one or more val to base from, similar to a computed funct
 ```ts
 import { createVal, select} from '@vyke/val'
 
-const val = createVal(1);
+const val = createVal(1)
 const plusOne = select((value) => {
-  return value + 1
+	return value + 1
 }, val)
 ```
 
