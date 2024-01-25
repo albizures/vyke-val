@@ -111,5 +111,8 @@ const plusOne = select((value) => {
 }, val)
 ```
 
-# Inspiration and Credits
- -
+# Others vyke projects
+- [Flowmodoro app by vyke](https://github.com/albizures/vyke-flowmodoro)
+- [@vyke/results](https://github.com/albizures/vyke-results)
+- [@vyke/dom](https://github.com/albizures/vyke-dom)
+- [@vyke/tsdocs](https://github.com/albizures/vyke-tsdocs)
