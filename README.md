@@ -3,11 +3,10 @@
 		@vyke/val
 	</h1>
 </div>
-Functional and tiny (<1kb) helpers to select (compute) watch and manage values. Similar to signals but with explicit dependencies
+Functional and tiny (<1kb) helpers to select (compute), watch and manage values. Similar to signals but with explicit dependencies
 
 ## Installation
 ```sh
-# @vyke/results is a peer dependency
 npm i @vyke/val
 ```
 
