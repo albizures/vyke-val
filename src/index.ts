@@ -18,7 +18,7 @@ export type Val<T> = ReadVal<T> & {
  *
  * const index = createVal(1)
  * //      ^? number
- * // Type infered by default or manually
+ * // Type inferred by default or manually
  * const counter = createVal<1 | 2 | 3 | 4>(1)
  * ```
  */
@@ -155,7 +155,7 @@ export let watch = <TVals extends Array<ReadVal<any>>>(
 	return unwatch
 }
 
-export type SelectFn<TValues extends Array<any>, TOuput> = (...value: TValues) => TOuput
+export type SelectFn<TValues extends Array<any>, TOutput> = (...value: TValues) => TOutput
 
 /**
  * Create a new val using one or more val to base from, similar to a computed function
@@ -171,13 +171,13 @@ export type SelectFn<TValues extends Array<any>, TOuput> = (...value: TValues) =
  */
 export let select = <
 	TVals extends Array<ReadVal<any>>,
-	TOuput,
+	TOutput,
 >(
-		fn: SelectFn<InferEachType<TVals>, TOuput>,
+		fn: SelectFn<InferEachType<TVals>, TOutput>,
 		...vals: TVals
-	): ReadVal<TOuput> => {
+	): ReadVal<TOutput> => {
 	let val = {
-		watch(listener: Listener<TOuput>) {
+		watch(listener: Listener<TOutput>) {
 			return watch((...values) => {
 				return listener(fn(...values))
 			}, ...vals)

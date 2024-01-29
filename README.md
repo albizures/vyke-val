@@ -46,7 +46,7 @@ import { createVal } from '@vyke/val'
 
 const index = createVal(1)
 //      ^? number
-// Type infered by default or manually
+// Type inferred by default or manually
 const counter = createVal<1 | 2 | 3 | 4>(1)
 ```
 
@@ -110,7 +110,7 @@ const plusOne = select((value) => {
 }, val)
 ```
 
-# Others vyke projects
+## Others vyke projects
 - [Flowmodoro app by vyke](https://github.com/albizures/vyke-flowmodoro)
 - [@vyke/results](https://github.com/albizures/vyke-results)
 - [@vyke/dom](https://github.com/albizures/vyke-dom)
