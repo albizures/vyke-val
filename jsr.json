@@ -1,8 +1,8 @@
 {
 	"name": "@vyke/val",
 	"version": "0.0.2",
-	"license": "MIT",
 	"exports": {
 		".": "./src/index.ts"
-	}
+	},
+	"license": "MIT"
 }
