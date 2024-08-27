@@ -77,7 +77,7 @@ export type InferEachType<TVals> = TVals extends [infer THead]
  * console.log(get(index))
  * ```
  */
-export let get = <T>(val: ReadVal<T>) => {
+export let get = <T>(val: ReadVal<T>): T => {
 	return val.get()
 }
 
@@ -96,7 +96,7 @@ export let get = <T>(val: ReadVal<T>) => {
  * console.log(get(index))
  * ```
  */
-export let set = <T>(val: Val<T>, value: T) => {
+export let set = <T>(val: Val<T>, value: T): void => {
 	return val.set(value)
 }
 
@@ -132,7 +132,7 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
 export let watch = <TVals extends Array<ReadVal<any>>>(
 	listener: Watcher<InferEachType<TVals>>,
 	...vals: TVals
-) => {
+): () => void => {
 	let unwatchers: Array<Unsubscribe> = []
 
 	function unwatch() {
@@ -173,9 +173,9 @@ export let select = <
 	TVals extends Array<ReadVal<any>>,
 	TOutput,
 >(
-		fn: SelectFn<InferEachType<TVals>, TOutput>,
-		...vals: TVals
-	): ReadVal<TOutput> => {
+	fn: SelectFn<InferEachType<TVals>, TOutput>,
+	...vals: TVals
+): ReadVal<TOutput> => {
 	let val = {
 		watch(listener: Listener<TOutput>) {
 			return watch((...values) => {
@@ -184,6 +184,52 @@ export let select = <
 		},
 		get() {
 			return fn(...getValues(...vals))
+		},
+	}
+
+	return val
+}
+
+/**
+ * Create a new val using the given object where each key is a val
+ * @example
+ * ```ts
+ * import { createVal, pack } from '@vyke/val'
+ *
+ * const val1 = createVal(1)
+ * const val2 = createVal(2)
+ * const val12 = pack({
+ * 	val1,
+ * 	val2,
+ * })
+ *
+ * plusOne.watch((values) => {
+ * 	console.log(values.val1, values.val2)
+ * })
+ * ```
+ */
+export let pack = <T extends Record<string, ReadVal<any>>>(vals: T): ReadVal<{ [K in keyof T]: InferType<T[K]> }> => {
+	let entries = Object.entries(vals)
+	let result: Partial<Record<string, unknown>> = {}
+
+	function sync() {
+		for (let [key, val] of entries) {
+			result[key] = get(val)
+		}
+	}
+
+	watch(() => {
+		sync()
+	}, ...Object.values(vals))
+
+	sync()
+
+	let val = {
+		watch(listener: Listener<{ [K in keyof T]: InferType<T[K]> } >) {
+			return watch(listener, ...Object.values(vals))
+		},
+		get() {
+			return result as { [K in keyof T]: InferType<T[K]> }
 		},
 	}
 

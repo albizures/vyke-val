@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createVal, getValues, select, watch } from '.'
+import { createVal, get, getValues, pack, select, watch } from '.'
 
 it('should return the value', () => {
 	const value = createVal<number | undefined>(undefined)
@@ -149,6 +149,22 @@ describe('subscribe', () => {
 			ageVal.set(20)
 
 			expect(listener).toHaveBeenCalledTimes(1)
+		})
+	})
+})
+
+describe('pack', () => {
+	it('should return the values', () => {
+		const nameVal = createVal('Jose')
+		const ageVal = createVal(15)
+
+		const userVal = pack({ name: nameVal, age: ageVal })
+
+		const user = get(userVal)
+
+		expect(user).toStrictEqual({
+			name: 'Jose',
+			age: 15,
 		})
 	})
 })

@@ -12,29 +12,23 @@ npm i @vyke/val
 
 ## Examples
 ```ts
-import { r } from '@vyke/val'
-import { query, select } from '@vyke/dom'
+import { createVal, pack } from '@vyke/val'
 
-const [app] = r.unwrap(select(
-	query<HTMLDivElement>('#app'),
-))
+const nameVal = createVal('Joe')
+const ageVal = createVal(15)
 
-console.log(app)
-//           ^? HTMLDivElement
-```
+const fullNameVal = select((name, age) => {
+	return `${name} ${age}`
+}, nameVal, ageVal)
 
-Querying inside an specific element
-```ts
-import { r } from '@vyke/results/r'
-import { query, selectIn } from '@vyke/dom'
+const userVal = pack({
+	fullName: fullNameVal,
+	username: createVal('joe15')
+})
 
-const [submitBtn] = r.unwrap(selectIn(
-	form,
-	query<HTMLButtonElement>('#submit'),
-))
-
-console.log(submitBtn)
-//             ^? HTMLButtonElement
+watch((user) => {
+	console.log(user.fullName)
+}, userVal)
 ```
 
 ## API
