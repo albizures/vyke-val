@@ -3,7 +3,7 @@
 		@vyke/val
 	</h1>
 </div>
-Functional and tiny (<1kb) helpers to select (compute), watch and manage values. Similar to signals but with explicit dependencies
+Simple and tiny (<1kb) helpers to select (compute), watch and manage values. Similar to signals but with explicit dependencies
 
 ## Installation
 ```sh
