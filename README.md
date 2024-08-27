@@ -104,6 +104,24 @@ const plusOne = select((value) => {
 }, val)
 ```
 
+### pack
+Create a new val using the given object where each key is a val
+
+```ts
+import { createVal, pack } from '@vyke/val'
+
+const val1 = createVal(1)
+const val2 = createVal(2)
+const val12 = pack({
+	val1,
+	val2,
+})
+
+plusOne.watch((values) => {
+	console.log(values.val1, values.val2)
+})
+```
+
 ## Others vyke projects
 - [Flowmodoro app by vyke](https://github.com/albizures/vyke-flowmodoro)
 - [@vyke/results](https://github.com/albizures/vyke-results)
