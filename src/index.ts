@@ -176,14 +176,32 @@ export let select = <
 	fn: SelectFn<InferEachType<TVals>, TOutput>,
 	...vals: TVals
 ): ReadVal<TOutput> => {
+	const listeners = new Set<Listener<TOutput>>()
+	let value = fn(...getValues(...vals))
+
+	watch((...values) => {
+		let newValue = fn(...values)
+		if (newValue !== value) {
+			value = newValue
+
+			for (let listener of listeners) {
+				if (listener(value) === false) {
+					listeners.delete(listener)
+				}
+			}
+		}
+	}, ...vals)
+
 	let val = {
 		watch(listener: Listener<TOutput>) {
-			return watch((...values) => {
-				return listener(fn(...values))
-			}, ...vals)
+			listeners.add(listener)
+
+			return () => {
+				listeners.delete(listener)
+			}
 		},
 		get() {
-			return fn(...getValues(...vals))
+			return value
 		},
 	}
 
@@ -208,28 +226,50 @@ export let select = <
  * })
  * ```
  */
-export let pack = <T extends Record<string, ReadVal<any>>>(vals: T): ReadVal<{ [K in keyof T]: InferType<T[K]> }> => {
-	let entries = Object.entries(vals)
+export let pack = <
+	TValues extends Record<string, ReadVal<any>>,
+	TOutput = { [K in keyof TValues]: InferType<TValues[K]> },
+
+>(vals: TValues): ReadVal<TOutput> => {
+	const entries = Object.entries(vals)
+	const listeners = new Set<Listener<TOutput>>()
 	let result: Partial<Record<string, unknown>> = {}
 
 	function sync() {
+		let changed = false
 		for (let [key, val] of entries) {
-			result[key] = get(val)
+			let newValue = get(val)
+			if (result[key] !== newValue) {
+				changed = true
+				result[key] = newValue
+			}
 		}
+
+		return changed
 	}
 
 	watch(() => {
-		sync()
+		if (sync()) {
+			for (let listener of listeners) {
+				if (listener(result as TOutput) === false) {
+					listeners.delete(listener)
+				}
+			}
+		}
 	}, ...Object.values(vals))
 
 	sync()
 
 	let val = {
-		watch(listener: Listener<{ [K in keyof T]: InferType<T[K]> } >) {
-			return watch(listener, ...Object.values(vals))
+		watch(listener: Listener<TOutput >) {
+			listeners.add(listener)
+
+			return () => {
+				listeners.delete(listener)
+			}
 		},
 		get() {
-			return result as { [K in keyof T]: InferType<T[K]> }
+			return result as TOutput
 		},
 	}
 

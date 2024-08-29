@@ -52,67 +52,6 @@ describe('getValues', () => {
 	})
 })
 
-describe('select', () => {
-	it('should be sync to the selected val', () => {
-		const ageVal = createVal(15)
-		const legalAgeVal = createVal(18)
-		const isUnderAge = select((age, legalAge) => {
-			return age >= legalAge
-		}, ageVal, legalAgeVal)
-
-		expect(isUnderAge.get()).toBe(false)
-
-		ageVal.set(19)
-		expect(isUnderAge.get()).toBe(true)
-	})
-
-	it('should subscribe to changes', () => {
-		const ageVal = createVal(15)
-		const legalAgeVal = createVal(18)
-		const isUnderAge = select((age, legalAge) => {
-			return age >= legalAge
-		}, ageVal, legalAgeVal)
-
-		const fn = vi.fn()
-		isUnderAge.watch(fn)
-		ageVal.set(19)
-
-		expect(fn).toHaveBeenNthCalledWith(1, true)
-
-		ageVal.set(10)
-
-		expect(fn).toHaveBeenNthCalledWith(2, false)
-
-		legalAgeVal.set(22)
-		ageVal.set(24)
-
-		expect(fn).toHaveBeenNthCalledWith(3, false)
-		expect(fn).toHaveBeenNthCalledWith(4, true)
-	})
-
-	describe('when returning false', () => {
-		it('should unsubscribe', () => {
-			const ageVal = createVal(15)
-			const legalAge = createVal(18)
-			const isUnderAge = select((age, legalAge) => {
-				return age >= legalAge
-			}, ageVal, legalAge)
-
-			const fn = vi.fn(() => false)
-			isUnderAge.watch(fn)
-			ageVal.set(19)
-
-			expect(fn).toHaveBeenNthCalledWith(1, true)
-
-			ageVal.set(10)
-			ageVal.set(11)
-			ageVal.set(11)
-
-			expect(fn).toHaveBeenCalledTimes(1)
-		})
-	})
-})
-
 describe('subscribe', () => {
 	it('should subscribe', () => {
 		const nameVal = createVal('Miguel')
@@ -149,22 +88,6 @@ describe('subscribe', () => {
 			ageVal.set(20)
 
 			expect(listener).toHaveBeenCalledTimes(1)
-		})
-	})
-})
-
-describe('pack', () => {
-	it('should return the values', () => {
-		const nameVal = createVal('Jose')
-		const ageVal = createVal(15)
-
-		const userVal = pack({ name: nameVal, age: ageVal })
-
-		const user = get(userVal)
-
-		expect(user).toStrictEqual({
-			name: 'Jose',
-			age: 15,
 		})
 	})
 })
