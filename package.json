@@ -1,7 +1,7 @@
 {
 	"name": "@vyke/val",
 	"type": "module",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Simple and tiny (<1kb) helpers to select (compute), watch and manage values",
 	"author": "Jose Albizures <jose@albizures.com> (https://albizures.com/)",
 	"license": "MIT",
