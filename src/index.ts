@@ -96,8 +96,9 @@ export let get = <T>(val: ReadVal<T>): T => {
  * console.log(get(index))
  * ```
  */
-export let set = <T>(val: Val<T>, value: T): void => {
-	return val.set(value)
+export let set = <T>(val: Val<T>, value: T): T => {
+	val.set(value)
+	return value
 }
 
 /**

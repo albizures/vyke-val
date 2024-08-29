@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createVal, get, pack, select } from '.'
+import { createVal, select } from '.'
 
 it('should be sync to the selected val', () => {
 	const ageVal = createVal(15)

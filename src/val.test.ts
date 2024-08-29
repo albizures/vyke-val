@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createVal, get, getValues, pack, select, watch } from '.'
+import { createVal, getValues, watch } from '.'
 
 it('should return the value', () => {
 	const value = createVal<number | undefined>(undefined)
