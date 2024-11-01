@@ -112,7 +112,7 @@ const [name, age] = getValues($name, $age)
 To watch any changes for one or multiple vals at once
 
 ```ts
-import { watch, val } from '@vyke/val'
+import { val, watch } from '@vyke/val'
 const $name = val('Jose')
 const $age = val(15)
 watch((name, age) => {
