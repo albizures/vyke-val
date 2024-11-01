@@ -78,7 +78,7 @@ export type InferEachType<TVals> = TVals extends [infer THead]
  * returns the value of a val
  * @example
  * ```ts
- * import { val, get } from '@vyke/val'
+ * import { get, val } from '@vyke/val'
  *
  * const $index = val(1)
  * console.log(get($index))
@@ -93,7 +93,7 @@ export let get = <T>(val: ReadVal<T>): T => {
  * sets the value of a val
  * @example
  * ```ts
- * import { val, get, set } from '@vyke/val'
+ * import { get, set, val } from '@vyke/val'
  *
  * const $index = val(1)
  * console.log(get($index))
@@ -112,7 +112,7 @@ export let set = <T>(val: Val<T>, value: T): T => {
  * Similar to the get function but for multiple vals at once
  * @example
  * ```ts
- * import { val, getValues } from '@vyke/val'
+ * import { getValues, val } from '@vyke/val'
  *
  * const $name = val('Jose')
  * const $age = val(15)
@@ -129,7 +129,7 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * To watch any changes for one or multiple vals at once
  * @example
  * ```ts
- * import { val, watch } from '@vyke/val'
+ * import { effect, val } from '@vyke/val'
  * const $name = val('Jose')
  * const $age = val(15)
  * watch((name, age) => {
@@ -169,7 +169,7 @@ export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues
  * Create a new val using one or more val to base from, similar to a computed function
  * @example
  * ```ts
- * import { val, select } from '@vyke/val'
+ * import { select, val } from '@vyke/val'
  *
  * const $val = val(1)
  * const $plusOne = select((value) => {
@@ -224,7 +224,7 @@ export let computed = <
  * Create a new val using the given object where each key is a val
  * @example
  * ```ts
- * import { val, pack } from '@vyke/val'
+ * import { pack, val } from '@vyke/val'
  *
  * const $val1 = val(1)
  * const $val2 = val(2)
