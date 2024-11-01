@@ -129,7 +129,7 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * To watch any changes for one or multiple vals at once
  * @example
  * ```ts
- * import { watch, val } from '@vyke/val'
+ * import { val, watch } from '@vyke/val'
  * const $name = val('Jose')
  * const $age = val(15)
  * watch((name, age) => {
