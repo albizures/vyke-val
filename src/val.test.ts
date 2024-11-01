@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createVal, getValues, watch } from '.'
+import { createVal, effect, getValues } from '.'
 
 it('should return the value', () => {
 	const value = createVal<number | undefined>(undefined)
@@ -59,7 +59,7 @@ describe('subscribe', () => {
 
 		const listener = vi.fn()
 
-		watch(listener, nameVal, ageVal)
+		effect(listener, nameVal, ageVal)
 
 		nameVal.set('Maria')
 
@@ -77,7 +77,7 @@ describe('subscribe', () => {
 
 			const listener = vi.fn(() => false)
 
-			watch(listener, nameVal, ageVal)
+			effect(listener, nameVal, ageVal)
 
 			nameVal.set('Maria')
 

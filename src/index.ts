@@ -1,10 +1,18 @@
 type Listener<T> = (value: T) => boolean | void
 type Unsubscribe = () => void
 
+let createSet = <T>() => new Set<T>()
+
+/**
+ * A read val is a reactive value that can be watched
+ */
 export type ReadVal<T> = {
 	get: () => T
 	watch: (fn: Listener<T>) => Unsubscribe
 }
+/**
+ * A val is a reactive value that can be watched and updated
+ */
 export type Val<T> = ReadVal<T> & {
 	notify: () => void
 	set: (value: T, update?: boolean) => void
@@ -16,15 +24,15 @@ export type Val<T> = ReadVal<T> & {
  * ```ts
  * import { createVal } from '@vyke/val'
  *
- * const index = createVal(1)
+ * const $index = createVal(1)
  * //      ^? number
  * // Type inferred by default or manually
- * const counter = createVal<1 | 2 | 3 | 4>(1)
+ * const $counter = createVal<1 | 2 | 3 | 4>(1)
  * ```
  */
 export let createVal = <T>(defaultValue: T): Val<T> => {
 	let current = defaultValue
-	let listeners = new Set<Listener<any>>()
+	let listeners = createSet<Listener<any>>()
 
 	let val = {
 		notify() {
@@ -45,14 +53,12 @@ export let createVal = <T>(defaultValue: T): Val<T> => {
 			return current
 		},
 		set(value: T, update = true) {
-			if (value === current) {
-				return
-			}
+			if (value !== current) {
+				current = value
 
-			current = value
-
-			if (update) {
-				val.notify()
+				if (update) {
+					val.notify()
+				}
 			}
 		},
 	}
@@ -73,8 +79,8 @@ export type InferEachType<TVals> = TVals extends [infer THead]
  * ```ts
  * import { createVal, get } from '@vyke/val'
  *
- * const index = createVal(1)
- * console.log(get(index))
+ * const $index = createVal(1)
+ * console.log(get($index))
  * ```
  */
 export let get = <T>(val: ReadVal<T>): T => {
@@ -88,12 +94,12 @@ export let get = <T>(val: ReadVal<T>): T => {
  * ```ts
  * import { createVal, get, set } from '@vyke/val'
  *
- * const index = createVal(1)
- * console.log(get(index))
+ * const $index = createVal(1)
+ * console.log(get($index))
  *
- * set(index, 2)
+ * set($index, 2)
  *
- * console.log(get(index))
+ * console.log(get($index))
  * ```
  */
 export let set = <T>(val: Val<T>, value: T): T => {
@@ -107,9 +113,9 @@ export let set = <T>(val: Val<T>, value: T): T => {
  * ```ts
  * import { createVal, getValues } from '@vyke/val'
  *
- * const nameVal = createVal('Jose')
- * const ageVal = createVal(15)
- * const [name, age] = getValues(nameVal, ageVal)
+ * const $name = createVal('Jose')
+ * const $age = createVal(15)
+ * const [name, age] = getValues($name, $age)
  * ```
  */
 export let getValues = <T extends Array<ReadVal<any>>>(...values: T): InferEachType<T> => {
@@ -123,20 +129,20 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * @example
  * ```ts
  * import { createVal, watch } from '@vyke/val'
- * const nameVal = createVal('Jose')
- * const ageVal = createVal(15)
+ * const $name = createVal('Jose')
+ * const $age = createVal(15)
  * watch((name, age) => {
  * 	console.log(name, age)
- * }, nameVal, ageVal)
+ * }, $name, $age)
  * ```
  */
-export let watch = <TVals extends Array<ReadVal<any>>>(
+export let effect = <TVals extends Array<ReadVal<any>>>(
 	listener: Watcher<InferEachType<TVals>>,
 	...vals: TVals
 ): () => void => {
 	let unwatchers: Array<Unsubscribe> = []
 
-	function unwatch() {
+	let unwatch = () => {
 		for (let currentUnwatcher of unwatchers) {
 			currentUnwatcher()
 		}
@@ -164,23 +170,23 @@ export type SelectFn<TValues extends Array<any>, TOutput> = (...value: TValues) 
  * ```ts
  * import { createVal, select } from '@vyke/val'
  *
- * const val = createVal(1)
- * const plusOne = select((value) => {
+ * const $val = createVal(1)
+ * const $plusOne = select((value) => {
  * 	return value + 1
-	}, val)
+	}, $val)
  * ```
  */
-export let select = <
+export let computed = <
 	TVals extends Array<ReadVal<any>>,
 	TOutput,
 >(
 	fn: SelectFn<InferEachType<TVals>, TOutput>,
 	...vals: TVals
 ): ReadVal<TOutput> => {
-	const listeners = new Set<Listener<TOutput>>()
+	const listeners = createSet<Listener<TOutput>>()
 	let value = fn(...getValues(...vals))
 
-	watch((...values) => {
+	effect((...values) => {
 		let newValue = fn(...values)
 		if (newValue !== value) {
 			value = newValue
@@ -215,15 +221,15 @@ export let select = <
  * ```ts
  * import { createVal, pack } from '@vyke/val'
  *
- * const val1 = createVal(1)
- * const val2 = createVal(2)
- * const val12 = pack({
- * 	val1,
- * 	val2,
+ * const $val1 = createVal(1)
+ * const $val2 = createVal(2)
+ * const $val12 = pack({
+ * 	val1: $val1,
+ * 	val2: $val2,
  * })
  *
- * plusOne.watch((values) => {
- * 	console.log(values.val1, values.val2)
+ * $val12.watch((values) => {
+ * 	console.log($values.val1, $values.val2)
  * })
  * ```
  */
@@ -233,10 +239,10 @@ export let pack = <
 
 >(vals: TValues): ReadVal<TOutput> => {
 	const entries = Object.entries(vals)
-	const listeners = new Set<Listener<TOutput>>()
+	const listeners = createSet<Listener<TOutput>>()
 	let result: Partial<Record<string, unknown>> = {}
 
-	function sync() {
+	let sync = () => {
 		let changed = false
 		for (let [key, val] of entries) {
 			let newValue = get(val)
@@ -249,7 +255,7 @@ export let pack = <
 		return changed
 	}
 
-	watch(() => {
+	effect(() => {
 		if (sync()) {
 			for (let listener of listeners) {
 				if (listener(result as TOutput) === false) {

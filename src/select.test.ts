@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createVal, select } from '.'
+import { computed, createVal } from '.'
 
 it('should be sync to the selected val', () => {
 	const ageVal = createVal(15)
 	const legalAgeVal = createVal(18)
-	const isUnderAge = select((age, legalAge) => {
+	const isUnderAge = computed((age, legalAge) => {
 		return age >= legalAge
 	}, ageVal, legalAgeVal)
 
@@ -17,7 +17,7 @@ it('should be sync to the selected val', () => {
 it('should subscribe to changes', () => {
 	const ageVal = createVal(15)
 	const legalAgeVal = createVal(18)
-	const isUnderAge = select((age, legalAge) => {
+	const isUnderAge = computed((age, legalAge) => {
 		return age >= legalAge
 	}, ageVal, legalAgeVal)
 
@@ -40,7 +40,7 @@ it('should subscribe to changes', () => {
 it('should run the listener only once', () => {
 	const ageVal = createVal(15)
 	const legalAgeVal = createVal(18)
-	const isUnderAge = select((age, legalAge) => {
+	const isUnderAge = computed((age, legalAge) => {
 		return age >= legalAge
 	}, ageVal, legalAgeVal)
 
@@ -56,7 +56,7 @@ describe('the returned value is the same', () => {
 	it('should not notify', () => {
 		const ageVal = createVal(15)
 		const legalAge = createVal(18)
-		const isUnderAge = select((age, legalAge) => {
+		const isUnderAge = computed((age, legalAge) => {
 			return age >= legalAge
 		}, ageVal, legalAge)
 
