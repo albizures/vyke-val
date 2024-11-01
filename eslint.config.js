@@ -35,6 +35,7 @@ export default antfu(
 			'curly': ['error', 'all'],
 			'indent': 'off',
 			'antfu/consistent-list-newline': 'off',
+			'perfectionist/sort-imports': 'off',
 		},
 	},
 )
