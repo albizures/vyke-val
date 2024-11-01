@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { computed, val } from '.'
 
-it('should be sync to the selected val', () => {
+it('should be synced to the selected val', () => {
 	const $age = val(15)
 	const $legalAge = val(18)
 	const $isUnder = computed((age, legalAge) => {
@@ -52,7 +52,7 @@ it('should run the listener only once', () => {
 	expect(fn).toHaveBeenCalledTimes(1)
 })
 
-describe('the returned value is the same', () => {
+describe('if the returned value is the same', () => {
 	it('should not notify', () => {
 		const $age = val(15)
 		const $legalAge = val(18)

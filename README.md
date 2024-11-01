@@ -108,15 +108,27 @@ const $age = val(15)
 const [name, age] = getValues($name, $age)
 ```
 
-### effect
+### watch
 To watch any changes for one or multiple vals at once
+
+```ts
+import { watch, val } from '@vyke/val'
+const $name = val('Jose')
+const $age = val(15)
+watch((name, age) => {
+	console.log(name, age) // Jose 15 | run until next change
+}, $name, $age)
+```
+
+### effect
+Very similar to watch but it will run the listener at least once
 
 ```ts
 import { effect, val } from '@vyke/val'
 const $name = val('Jose')
 const $age = val(15)
-watch((name, age) => {
-	console.log(name, age)
+effect((name, age) => {
+	console.log(name, age) // Jose 15 | run immediately and on change
 }, $name, $age)
 ```
 

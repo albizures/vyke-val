@@ -129,15 +129,15 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * To watch any changes for one or multiple vals at once
  * @example
  * ```ts
- * import { effect, val } from '@vyke/val'
+ * import { watch, val } from '@vyke/val'
  * const $name = val('Jose')
  * const $age = val(15)
  * watch((name, age) => {
- * 	console.log(name, age)
+ * 	console.log(name, age) // Jose 15 | run until next change
  * }, $name, $age)
  * ```
  */
-export let effect = <TVals extends Array<ReadVal<any>>>(
+export let watch = <TVals extends Array<ReadVal<any>>>(
 	listener: Watcher<InferEachType<TVals>>,
 	...vals: TVals
 ): () => void => {
@@ -159,6 +159,28 @@ export let effect = <TVals extends Array<ReadVal<any>>>(
 			}
 		}))
 	}
+
+	return unwatch
+}
+
+/**
+ * Very similar to watch but it will run the listener at least once
+ * @example
+ * ```ts
+ * import { effect, val } from '@vyke/val'
+ * const $name = val('Jose')
+ * const $age = val(15)
+ * effect((name, age) => {
+ * 	console.log(name, age) // Jose 15 | run immediately and on change
+ * }, $name, $age)
+ * ```
+ */
+export let effect = <TVals extends Array<ReadVal<any>>>(
+	listener: Watcher<InferEachType<TVals>>,
+	...vals: TVals
+): () => void => {
+	const unwatch = watch(listener, ...vals)
+	listener(...getValues(...vals))
 
 	return unwatch
 }

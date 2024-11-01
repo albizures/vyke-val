@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { effect, getValues, val } from '.'
+import { effect, getValues, val, watch } from '.'
 
 it('should return the value', () => {
 	const $value = val<number | undefined>(undefined)
@@ -59,7 +59,7 @@ describe('subscribe', () => {
 
 		const listener = vi.fn()
 
-		effect(listener, $name, $age)
+		watch(listener, $name, $age)
 
 		$name.set('Maria')
 
@@ -77,7 +77,7 @@ describe('subscribe', () => {
 
 			const listener = vi.fn(() => false)
 
-			effect(listener, $name, $age)
+			watch(listener, $name, $age)
 
 			$name.set('Maria')
 
@@ -89,5 +89,18 @@ describe('subscribe', () => {
 
 			expect(listener).toHaveBeenCalledTimes(1)
 		})
+	})
+})
+
+describe('effect', () => {
+	it('should run the listener at least once', () => {
+		const $name = val('Jose')
+		const $age = val(15)
+
+		const listener = vi.fn()
+
+		effect(listener, $name, $age)
+
+		expect(listener).toHaveBeenNthCalledWith(1, 'Jose', 15)
 	})
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { computed, pack, val } from './fn'
-import { effect, getValues } from '.'
+import { getValues, watch } from '.'
 
 describe('val', () => {
 	it('should return the value', () => {
@@ -61,7 +61,7 @@ describe('val', () => {
 
 			const listener = vi.fn()
 
-			effect(listener, $name, $age)
+			watch(listener, $name, $age)
 
 			$name('Maria')
 
@@ -79,7 +79,7 @@ describe('val', () => {
 
 				const listener = vi.fn(() => false)
 
-				effect(listener, $name, $age)
+				watch(listener, $name, $age)
 
 				$name('Maria')
 
