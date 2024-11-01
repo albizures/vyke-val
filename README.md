@@ -76,7 +76,7 @@ const $counter = val<1 | 2 | 3 | 4>(1)
 returns the value of a val
 
 ```ts
-import { get, val } from '@vyke/val'
+import { val, get } from '@vyke/val'
 
 const $index = val(1)
 console.log(get($index))
@@ -87,7 +87,7 @@ console.log(get($index))
 sets the value of a val
 
 ```ts
-import { get, set, val } from '@vyke/val'
+import { val, get, set } from '@vyke/val'
 
 const $index = val(1)
 console.log(get($index))
@@ -101,7 +101,7 @@ console.log(get($index))
 Similar to the get function but for multiple vals at once
 
 ```ts
-import { getValues, val } from '@vyke/val'
+import { val, getValues } from '@vyke/val'
 
 const $name = val('Jose')
 const $age = val(15)
@@ -124,7 +124,7 @@ watch((name, age) => {
 Create a new val using one or more val to base from, similar to a computed function
 
 ```ts
-import { select, val } from '@vyke/val'
+import { val, select } from '@vyke/val'
 
 const $val = val(1)
 const $plusOne = select((value) => {
@@ -139,7 +139,7 @@ console.log(get($plusOne)) // 3
 Create a new val using the given object where each key is a val
 
 ```ts
-import { pack, val } from '@vyke/val'
+import { val, pack } from '@vyke/val'
 
 const $val1 = val(1)
 const $val2 = val(2)
