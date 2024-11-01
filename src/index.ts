@@ -22,12 +22,12 @@ export type Val<T> = ReadVal<T> & {
  * Create a new val
  * @example
  * ```ts
- * import { createVal } from '@vyke/val'
+ * import { val } from '@vyke/val'
  *
- * const $index = createVal(1)
+ * const $index = val(1)
  * //      ^? number
  * // Type inferred by default or manually
- * const $counter = createVal<1 | 2 | 3 | 4>(1)
+ * const $counter = val<1 | 2 | 3 | 4>(1)
  * ```
  */
 export let val = <T>(defaultValue: T): Val<T> => {
@@ -78,9 +78,9 @@ export type InferEachType<TVals> = TVals extends [infer THead]
  * returns the value of a val
  * @example
  * ```ts
- * import { createVal, get } from '@vyke/val'
+ * import { val, get } from '@vyke/val'
  *
- * const $index = createVal(1)
+ * const $index = val(1)
  * console.log(get($index))
  * ```
  */
@@ -93,9 +93,9 @@ export let get = <T>(val: ReadVal<T>): T => {
  * sets the value of a val
  * @example
  * ```ts
- * import { createVal, get, set } from '@vyke/val'
+ * import { val, get, set } from '@vyke/val'
  *
- * const $index = createVal(1)
+ * const $index = val(1)
  * console.log(get($index))
  *
  * set($index, 2)
@@ -112,10 +112,10 @@ export let set = <T>(val: Val<T>, value: T): T => {
  * Similar to the get function but for multiple vals at once
  * @example
  * ```ts
- * import { createVal, getValues } from '@vyke/val'
+ * import { val, getValues } from '@vyke/val'
  *
- * const $name = createVal('Jose')
- * const $age = createVal(15)
+ * const $name = val('Jose')
+ * const $age = val(15)
  * const [name, age] = getValues($name, $age)
  * ```
  */
@@ -129,9 +129,9 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * To watch any changes for one or multiple vals at once
  * @example
  * ```ts
- * import { createVal, watch } from '@vyke/val'
- * const $name = createVal('Jose')
- * const $age = createVal(15)
+ * import { val, watch } from '@vyke/val'
+ * const $name = val('Jose')
+ * const $age = val(15)
  * watch((name, age) => {
  * 	console.log(name, age)
  * }, $name, $age)
@@ -169,9 +169,9 @@ export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues
  * Create a new val using one or more val to base from, similar to a computed function
  * @example
  * ```ts
- * import { createVal, select } from '@vyke/val'
+ * import { val, select } from '@vyke/val'
  *
- * const $val = createVal(1)
+ * const $val = val(1)
  * const $plusOne = select((value) => {
  * 	return value + 1
  * }, $val)
@@ -224,18 +224,16 @@ export let computed = <
  * Create a new val using the given object where each key is a val
  * @example
  * ```ts
- * import { createVal, pack } from '@vyke/val'
+ * import { val, pack } from '@vyke/val'
  *
- * const $val1 = createVal(1)
- * const $val2 = createVal(2)
+ * const $val1 = val(1)
+ * const $val2 = val(2)
  * const $val12 = pack({
  * 	val1: $val1,
  * 	val2: $val2,
  * })
  *
- * $val12.watch((values) => {
- * 	console.log($values.val1, $values.val2)
- * })
+ * console.log(get($val12)) // { val1: 1, val2: 2 }
  * ```
  */
 export let pack = <

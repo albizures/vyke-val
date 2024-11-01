@@ -12,10 +12,13 @@ npm i @vyke/val
 
 ## Examples
 ```ts
-import { createVal, pack } from '@vyke/val'
+import { effect, get, pack, val } from '@vyke/val'
 
-const $name = createVal('Joe')
-const $age = createVal(15)
+const $name = val('Joe')
+const $age = val(15)
+
+console.log(get($name)) // Joe
+console.log(get($age)) // 15
 
 const $fullName = select((name, age) => {
 	return `${name} ${age}`
@@ -23,10 +26,35 @@ const $fullName = select((name, age) => {
 
 const $user = pack({
 	fullName: $fullName,
-	username: createVal('joe15')
+	username: val('joe15')
 })
 
-watch((user) => {
+effect((user) => {
+	console.log(user.fullName)
+}, $user)
+```
+
+### Using fn vals
+```ts
+import { effect, pack } from '@vyke/val'
+import { val } from '@vyke/val/fn'
+
+const $name = val('Joe')
+const $age = val(15)
+
+console.log($name()) // Joe
+console.log($age()) // 15
+
+const $fullName = select((name, age) => {
+	return `${name} ${age}`
+}, $name, $age)
+
+const $user = pack({
+	fullName: $fullName,
+	username: val('joe15')
+})
+
+effect((user) => {
 	console.log(user.fullName)
 }, $user)
 ```
@@ -36,21 +64,21 @@ watch((user) => {
 Create a new val
 
 ```ts
-import { createVal } from '@vyke/val'
+import { val } from '@vyke/val'
 
-const $index = createVal(1)
+const $index = val(1)
 //      ^? number
 // Type inferred by default or manually
-const $counter = createVal<1 | 2 | 3 | 4>(1)
+const $counter = val<1 | 2 | 3 | 4>(1)
 ```
 
 ### get
 returns the value of a val
 
 ```ts
-import { createVal, get } from '@vyke/val'
+import { get, val } from '@vyke/val'
 
-const $index = createVal(1)
+const $index = val(1)
 console.log(get($index))
 ```
 
@@ -59,9 +87,9 @@ console.log(get($index))
 sets the value of a val
 
 ```ts
-import { createVal, get, set } from '@vyke/val'
+import { get, set, val } from '@vyke/val'
 
-const $index = createVal(1)
+const $index = val(1)
 console.log(get($index))
 
 set($index, 2)
@@ -73,10 +101,10 @@ console.log(get($index))
 Similar to the get function but for multiple vals at once
 
 ```ts
-import { createVal, getValues } from '@vyke/val'
+import { getValues, val } from '@vyke/val'
 
-const $name = createVal('Jose')
-const $age = createVal(15)
+const $name = val('Jose')
+const $age = val(15)
 const [name, age] = getValues($name, $age)
 ```
 
@@ -84,9 +112,9 @@ const [name, age] = getValues($name, $age)
 To watch any changes for one or multiple vals at once
 
 ```ts
-import { createVal, watch } from '@vyke/val'
-const $name = createVal('Jose')
-const $age = createVal(15)
+import { val, watch } from '@vyke/val'
+const $name = val('Jose')
+const $age = val(15)
 watch((name, age) => {
 	console.log(name, age)
 }, $name, $age)
@@ -96,30 +124,31 @@ watch((name, age) => {
 Create a new val using one or more val to base from, similar to a computed function
 
 ```ts
-import { createVal, select } from '@vyke/val'
+import { select, val } from '@vyke/val'
 
-const $val = createVal(1)
+const $val = val(1)
 const $plusOne = select((value) => {
 	return value + 1
 }, $val)
+console.log(get($plusOne)) // 2
+set($val, 2)
+console.log(get($plusOne)) // 3
 ```
 
 ### pack
 Create a new val using the given object where each key is a val
 
 ```ts
-import { createVal, pack } from '@vyke/val'
+import { pack, val } from '@vyke/val'
 
-const $val1 = createVal(1)
-const $val2 = createVal(2)
+const $val1 = val(1)
+const $val2 = val(2)
 const $val12 = pack({
 	val1: $val1,
 	val2: $val2,
 })
 
-$val12.watch((values) => {
-	console.log($values.val1, $values.val2)
-})
+console.log(get($val12)) // { val1: 1, val2: 2 }
 ```
 
 ## Others vyke projects

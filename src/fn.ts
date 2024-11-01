@@ -5,6 +5,9 @@ type ReadFn<T> = {
 	(): T
 }
 
+/**
+ * a val that is also a function that can be used to get the value
+ */
 export type ReadFnVal<T> = ReadFn<T> & ReadVal<T>
 
 type Fn<T> = {
@@ -13,14 +16,15 @@ type Fn<T> = {
 }
 
 /**
- * a function that can be used to get and set the value of a val
+ * a val that is also a function that can be used to get and set the value
  */
 export type FnVal<T> = Fn<T> & Val<T>
 
 /**
- * creates a val with a default value and returns a function that can be used to get and set the value
+ * creates a val that is also a function that can be used to get and set the value
  * @example
  * ```ts
+ * import { val, select } from '@vyke/val/fn'
  * const $counter = val(0)
  *
  * console.log($counter()) // 0
@@ -48,9 +52,9 @@ export function val<T>(defaultValue: T): FnVal<T> {
  * Create a new val using one or more val to base from, similar to a computed function
  * @example
  * ```ts
- * import { createVal, select } from '@vyke/val'
+ * import { val, select } from '@vyke/val/fn'
  *
- * const $val = createVal(1)
+ * const $val = val(1)
  * const $plusOne = select((value) => {
  * 	return value + 1
  * }, $val)
@@ -75,6 +79,22 @@ export let computed = <
 	return Object.assign(computedFn, val)
 }
 
+/**
+ * Create a new val using the given object where each key is a val
+ * @example
+ * ```ts
+ * import { val, pack } from '@vyke/val/fn'
+ *
+ * const $val1 = val(1)
+ * const $val2 = val(2)
+ * const $val12 = pack({
+ * 	val1: $val1,
+ * 	val2: $val2,
+ * })
+ *
+ * console.log($val12()) // { val1: 1, val2: 2 }
+ * ```
+ */
 export let pack = <
 	TValues extends Record<string, ReadVal<any>>,
 	TOutput = { [K in keyof TValues]: InferType<TValues[K]> },
