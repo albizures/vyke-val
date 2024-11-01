@@ -32,7 +32,7 @@ watch((user) => {
 ```
 
 ## API
-### createVal
+### val
 Create a new val
 
 ```ts
