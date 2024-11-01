@@ -174,7 +174,10 @@ export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues
  * const $val = createVal(1)
  * const $plusOne = select((value) => {
  * 	return value + 1
-	}, $val)
+ * }, $val)
+ * console.log(get($plusOne)) // 2
+ * set($val, 2)
+ * console.log(get($plusOne)) // 3
  * ```
  */
 export let computed = <
