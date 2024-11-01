@@ -13,6 +13,10 @@
 		".": {
 			"import": "./dist/index.mjs",
 			"require": "./dist/index.cjs"
+		},
+		"./fn": {
+			"import": "./dist/fn.mjs",
+			"require": "./dist/fn.cjs"
 		}
 	},
 	"main": "./dist/index.cjs",

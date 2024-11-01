@@ -2,7 +2,8 @@
 	"name": "@vyke/val",
 	"version": "0.0.4",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./fn": "./src/fn.ts"
 	},
 	"license": "MIT"
 }
