@@ -1,14 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
-import { effect, getValues, val } from '.'
+import { val } from './fn'
+import { effect, getValues } from '.'
 
 it('should return the value', () => {
 	const $value = val<number | undefined>(undefined)
 
-	expect($value.get()).toBe(undefined)
+	expect($value()).toBe(undefined)
 
-	$value.set(1)
+	$value(1)
 
-	expect($value.get()).toBe(1)
+	expect($value()).toBe(1)
 })
 
 it('should subscribe to changes', () => {
@@ -18,9 +19,9 @@ it('should subscribe to changes', () => {
 
 	$value.watch(fn)
 
-	$value.set(1)
+	$value(1)
 	expect(fn).toHaveBeenNthCalledWith(1, 1)
-	$value.set(2)
+	$value(2)
 	expect(fn).toHaveBeenNthCalledWith(2, 2)
 })
 
@@ -32,10 +33,10 @@ describe('when returning false', () => {
 
 		$value.watch(fn)
 
-		$value.set(1)
+		$value(1)
 		expect(fn).toHaveBeenNthCalledWith(1, 1)
-		$value.set(2)
-		$value.set(3)
+		$value(2)
+		$value(3)
 		expect(fn).toHaveBeenCalledTimes(1)
 	})
 })
@@ -43,9 +44,9 @@ describe('when returning false', () => {
 describe('getValues', () => {
 	it('should return each value', () => {
 		const $name = val('Jose')
-		const $age = val(15)
+		const ageVal = val(15)
 
-		const [name, age] = getValues($name, $age)
+		const [name, age] = getValues($name, ageVal)
 
 		expect(name).toBe('Jose')
 		expect(age).toBe(15)
@@ -61,11 +62,11 @@ describe('subscribe', () => {
 
 		effect(listener, $name, $age)
 
-		$name.set('Maria')
+		$name('Maria')
 
 		expect(listener).toHaveBeenNthCalledWith(1, 'Maria', 15)
 
-		$age.set(18)
+		$age(18)
 
 		expect(listener).toHaveBeenNthCalledWith(2, 'Maria', 18)
 	})
@@ -79,13 +80,13 @@ describe('subscribe', () => {
 
 			effect(listener, $name, $age)
 
-			$name.set('Maria')
+			$name('Maria')
 
 			expect(listener).toHaveBeenNthCalledWith(1, 'Maria', 15)
 
-			$age.set(18)
-			$age.set(19)
-			$age.set(20)
+			$age(18)
+			$age(19)
+			$age(20)
 
 			expect(listener).toHaveBeenCalledTimes(1)
 		})

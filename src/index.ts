@@ -30,11 +30,11 @@ export type Val<T> = ReadVal<T> & {
  * const $counter = createVal<1 | 2 | 3 | 4>(1)
  * ```
  */
-export let createVal = <T>(defaultValue: T): Val<T> => {
+export let val = <T>(defaultValue: T): Val<T> => {
 	let current = defaultValue
 	let listeners = createSet<Listener<any>>()
 
-	let val = {
+	let val: Val<T> = {
 		notify() {
 			for (let listener of listeners) {
 				if (listener(current) === false) {
@@ -61,6 +61,7 @@ export let createVal = <T>(defaultValue: T): Val<T> => {
 				}
 			}
 		},
+
 	}
 
 	return val
@@ -162,7 +163,7 @@ export let effect = <TVals extends Array<ReadVal<any>>>(
 	return unwatch
 }
 
-export type SelectFn<TValues extends Array<any>, TOutput> = (...value: TValues) => TOutput
+export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues) => TOutput
 
 /**
  * Create a new val using one or more val to base from, similar to a computed function
@@ -180,7 +181,7 @@ export let computed = <
 	TVals extends Array<ReadVal<any>>,
 	TOutput,
 >(
-	fn: SelectFn<InferEachType<TVals>, TOutput>,
+	fn: ComputedFn<InferEachType<TVals>, TOutput>,
 	...vals: TVals
 ): ReadVal<TOutput> => {
 	const listeners = createSet<Listener<TOutput>>()
@@ -199,7 +200,7 @@ export let computed = <
 		}
 	}, ...vals)
 
-	let val = {
+	let val: ReadVal<TOutput> = {
 		watch(listener: Listener<TOutput>) {
 			listeners.add(listener)
 
@@ -210,6 +211,7 @@ export let computed = <
 		get() {
 			return value
 		},
+
 	}
 
 	return val
@@ -236,7 +238,6 @@ export let computed = <
 export let pack = <
 	TValues extends Record<string, ReadVal<any>>,
 	TOutput = { [K in keyof TValues]: InferType<TValues[K]> },
-
 >(vals: TValues): ReadVal<TOutput> => {
 	const entries = Object.entries(vals)
 	const listeners = createSet<Listener<TOutput>>()
@@ -267,7 +268,7 @@ export let pack = <
 
 	sync()
 
-	let val = {
+	let val: ReadVal<TOutput> = {
 		watch(listener: Listener<TOutput >) {
 			listeners.add(listener)
 

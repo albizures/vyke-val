@@ -1,31 +1,29 @@
 import { expect, it, vi } from 'vitest'
-import { createVal, get, pack } from '.'
+import { pack, val } from '.'
 
 it('should return the values', () => {
-	const nameVal = createVal('Jose')
-	const ageVal = createVal(15)
+	const $name = val('Jose')
+	const $age = val(15)
 
-	const userVal = pack({ name: nameVal, age: ageVal })
+	const $user = pack({ name: $name, age: $age })
 
-	const user = get(userVal)
-
-	expect(user).toStrictEqual({
+	expect($user.get()).toStrictEqual({
 		name: 'Jose',
 		age: 15,
 	})
 })
 
 it('should subscribe to changes', () => {
-	const nameVal = createVal('Jose')
-	const ageVal = createVal(15)
+	const $name = val('Jose')
+	const $age = val(15)
 
-	const userVal = pack({ name: nameVal, age: ageVal })
+	const $user = pack({ name: $name, age: $age })
 
 	const fn = vi.fn()
 
-	userVal.watch(fn)
+	$user.watch(fn)
 
-	nameVal.set('Maria')
+	$name.set('Maria')
 
 	expect(fn).toHaveBeenNthCalledWith(1, {
 		name: 'Maria',
