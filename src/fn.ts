@@ -1,4 +1,4 @@
-import type { ComputedFn, InferEachType, InferType, ReadVal, Val } from './index'
+import type { ComputedFn, InferEachType, InferType, ReadVal, Val, ValsFromFn } from './index'
 import { val as createVal, computed as valComputed, pack as valPack } from './index'
 
 type ReadFn<T> = {
@@ -36,7 +36,7 @@ const NO_VALUE = Symbol('NO_VALUE')
  * console.log($counter()) // 1
  * ```
  */
-export function val<T>(defaultValue: T): FnVal<T> {
+export let val = <T>(defaultValue: T): FnVal<T> => {
 	const val = createVal<T>(defaultValue)
 
 	function fn(value: T | typeof NO_VALUE = NO_VALUE, update?: boolean) {
@@ -66,12 +66,11 @@ export function val<T>(defaultValue: T): FnVal<T> {
  * ```
  */
 export let computed = <
-	TVals extends Array<ReadVal<any>>,
-	TOutput,
+	const TComputedFn extends ComputedFn<any, any>,
 >(
-	fn: ComputedFn<InferEachType<TVals>, TOutput>,
-	...vals: TVals
-): ReadFnVal<TOutput> => {
+	fn: TComputedFn,
+	...vals: ValsFromFn<TComputedFn>
+): ReadFnVal<ReturnType<TComputedFn>> => {
 	const val = valComputed(fn, ...vals)
 
 	const computedFn = () => {

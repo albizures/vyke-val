@@ -1,5 +1,14 @@
 type Listener<T> = (value: T) => boolean | void
 type Unsubscribe = () => void
+type ParamsAsVals<TParams extends Array<any>> = TParams extends [infer THead]
+	? [ReadVal<THead>]
+	: TParams extends [infer THead, ...infer TTail]
+		? [ReadVal<THead>, ...ParamsAsVals<TTail>]
+		: []
+
+export type ValsFromFn<TFn extends (...args: any) => void> = ParamsAsVals<Parameters<TFn>> extends []
+	? Array<any>
+	: ParamsAsVals<Parameters<TFn>>
 
 let createSet = <T>() => new Set<T>()
 
@@ -123,6 +132,13 @@ export let getValues = <T extends Array<ReadVal<any>>>(...values: T): InferEachT
 	return values.map(get) as InferEachType<T>
 }
 
+/**
+ * Similar to getValues but with a different type signature, mostly useful for internal usage
+ */
+export let getParams = <TArgs extends Array<any>>(vals: TArgs): TArgs => {
+	return vals.map(get) as TArgs
+}
+
 export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean | void
 
 /**
@@ -137,9 +153,11 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * }, $name, $age)
  * ```
  */
-export let watch = <TVals extends Array<ReadVal<any>>>(
-	listener: Watcher<InferEachType<TVals>>,
-	...vals: TVals
+export let watch = <
+	const TWatcher extends Watcher<any>,
+>(
+	watcher: TWatcher,
+	...vals: ValsFromFn<TWatcher>
 ): () => void => {
 	let unwatchers: Array<Unsubscribe> = []
 
@@ -153,7 +171,7 @@ export let watch = <TVals extends Array<ReadVal<any>>>(
 
 	for (let val of vals) {
 		unwatchers.push(val.watch(() => {
-			if (listener(...getValues(...vals)) === false) {
+			if (watcher(...getParams(vals)) === false) {
 				unwatch()
 				return false
 			}
@@ -175,9 +193,11 @@ export let watch = <TVals extends Array<ReadVal<any>>>(
  * }, $name, $age)
  * ```
  */
-export let effect = <TVals extends Array<ReadVal<any>>>(
-	listener: Watcher<InferEachType<TVals>>,
-	...vals: TVals
+export let effect = <
+	const TWatcher extends Watcher<any>,
+>(
+	listener: TWatcher,
+	...vals: ValsFromFn<TWatcher>
 ): () => void => {
 	const unwatch = watch(listener, ...vals)
 	listener(...getValues(...vals))
@@ -203,16 +223,16 @@ export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues
  * ```
  */
 export let computed = <
-	TVals extends Array<ReadVal<any>>,
-	TOutput,
+	const TComputedFn extends ComputedFn<any, any>,
 >(
-	fn: ComputedFn<InferEachType<TVals>, TOutput>,
-	...vals: TVals
-): ReadVal<TOutput> => {
+	fn: TComputedFn,
+	...vals: ValsFromFn<TComputedFn>
+): ReadVal<ReturnType<TComputedFn>> => {
+	type TOutput = ReturnType<TComputedFn>
 	const listeners = createSet<Listener<TOutput>>()
 	let value = fn(...getValues(...vals))
 
-	effect((...values) => {
+	effect((...values: Parameters<TComputedFn>) => {
 		let newValue = fn(...values)
 		if (newValue !== value) {
 			value = newValue
@@ -279,6 +299,7 @@ export let pack = <
 		return changed
 	}
 
+	// we are listening all the vals but we are not using the values
 	effect(() => {
 		if (sync()) {
 			for (let listener of listeners) {
