@@ -1,4 +1,4 @@
-import type { ComputedFn, InferEachType, InferType, ReadVal, Val, ValsFromFn } from './index'
+import type { ComputedFn, InferType, ReadVal, Val, ValsFromFn } from './index'
 import { val as createVal, computed as valComputed, pack as valPack } from './index'
 
 type ReadFn<T> = {
