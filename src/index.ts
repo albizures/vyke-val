@@ -1,6 +1,10 @@
 type Listener<T> = (value: T) => boolean | void
 type Unsubscribe = () => void
-type ParamsAsVals<TParams extends Array<any>> = TParams extends [infer THead]
+
+/**
+ * Returns the values of a function
+ */
+export type ParamsAsVals<TParams extends Array<any>> = TParams extends [infer THead]
 	? [ReadVal<THead>]
 	: TParams extends [infer THead, ...infer TTail]
 		? [ReadVal<THead>, ...ParamsAsVals<TTail>]

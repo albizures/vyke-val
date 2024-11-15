@@ -13,6 +13,18 @@ describe('val', () => {
 		expect($value()).toBe(1)
 	})
 
+	it('should allow set to undefined', () => {
+		const $value = val<number | undefined>(undefined)
+
+		$value(1)
+
+		expect($value()).toBe(1)
+
+		$value(undefined)
+
+		expect($value()).toBe(undefined)
+	})
+
 	it('should subscribe to changes', () => {
 		const $value = val<number>(0)
 

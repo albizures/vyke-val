@@ -20,8 +20,6 @@ type Fn<T> = {
  */
 export type FnVal<T> = Fn<T> & Val<T>
 
-const NO_VALUE = Symbol('NO_VALUE')
-
 /**
  * creates a val that is also a function that can be used to get and set the value
  * @example
@@ -39,13 +37,15 @@ const NO_VALUE = Symbol('NO_VALUE')
 export let val = <T>(defaultValue: T): FnVal<T> => {
 	const val = createVal<T>(defaultValue)
 
-	function fn(value: T | typeof NO_VALUE = NO_VALUE, update?: boolean) {
-		if (value !== NO_VALUE) {
-			val.set(value, update)
+	type Args = [T, boolean?] | []
+
+	const fn = ((...args: Args) => {
+		if (args.length === 0) {
+			return val.get()
 		}
 
-		return val.get()
-	}
+		val.set(args[0]!, args[1])
+	}) as Fn<T>
 
 	return Object.assign(fn, val)
 }
