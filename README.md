@@ -166,6 +166,9 @@ const $val12 = pack({
 console.log(get($val12)) // { val1: 1, val2: 2 }
 ```
 
+### isVal
+checks whether a value is a val or not
+
 ## Others vyke projects
 - [Flowmodoro app by vyke](https://github.com/albizures/vyke-flowmodoro)
 - [@vyke/results](https://github.com/albizures/vyke-results)
