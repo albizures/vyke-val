@@ -316,6 +316,7 @@ export let isVal = (value: any): value is ReadVal<unknown> => {
 
 /**
  * Create a new val
+ * @index 0
  * @example
  * ```ts
  * import { val } from '@vyke/val'
