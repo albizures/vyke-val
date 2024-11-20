@@ -16,6 +16,8 @@ export type ValsFromFn<TFn extends (...args: any) => void> = ParamsAsVals<Parame
 
 let createSet = <T>() => new Set<T>()
 
+type Getter<T, Y> = (current: T) => Y
+
 /**
  * A read val is a reactive value that can be watched
  */
@@ -23,6 +25,12 @@ export type ReadVal<T> = {
 	[IS_VAL]: true
 	get: () => T
 	watch: (fn: Listener<T>) => Unsubscribe
+	/**
+	 * Returns a new val that is based on the current value
+	 * Similar to computed but with simpler usage
+	 */
+	use: <Y>(getter: Getter<T, Y>) => ReadVal<Y>
+	prop: <K extends keyof T>(key: K) => ReadVal<T[K]>
 }
 /**
  * A val is a reactive value that can be watched and updated
@@ -30,56 +38,6 @@ export type ReadVal<T> = {
 export type Val<T> = ReadVal<T> & {
 	notify: () => void
 	set: (value: T, update?: boolean) => void
-}
-
-/**
- * Create a new val
- * @example
- * ```ts
- * import { val } from '@vyke/val'
- *
- * const $index = val(1)
- * //      ^? number
- * // Type inferred by default or manually
- * const $counter = val<1 | 2 | 3 | 4>(1)
- * ```
- */
-export let val = <T>(defaultValue: T): Val<T> => {
-	let current = defaultValue
-	let listeners = createSet<Listener<any>>()
-
-	let val: Val<T> = {
-		[IS_VAL]: true,
-		notify() {
-			for (let listener of listeners) {
-				if (listener(current) === false) {
-					listeners.delete(listener)
-				}
-			}
-		},
-		watch<T>(listener: Listener<T>) {
-			listeners.add(listener)
-
-			return () => {
-				listeners.delete(listener)
-			}
-		},
-		get() {
-			return current
-		},
-		set(value: T, update = true) {
-			if (value !== current) {
-				current = value
-
-				if (update) {
-					val.notify()
-				}
-			}
-		},
-
-	}
-
-	return val
 }
 
 export type InferType<TVal> = TVal extends ReadVal<infer TValue> ? TValue : never
@@ -263,7 +221,12 @@ export let computed = <
 		get() {
 			return value
 		},
-
+		use<Y>(getter: Getter<TOutput, Y>) {
+			return computed(getter, val)
+		},
+		prop<K extends keyof TOutput>(key: K) {
+			return computed((value) => value[key], val)
+		},
 	}
 
 	return val
@@ -331,6 +294,14 @@ export let pack = <
 		get() {
 			return result as TOutput
 		},
+
+		use<Y>(getter: Getter<TOutput, Y>) {
+			return computed(getter, val)
+		},
+
+		prop<K extends keyof TOutput>(key: K) {
+			return computed((value) => value[key], val)
+		},
 	}
 
 	return val
@@ -341,4 +312,59 @@ export let pack = <
  */
 export let isVal = (value: any): value is ReadVal<unknown> => {
 	return Boolean(value && value[IS_VAL])
+}
+
+/**
+ * Create a new val
+ * @example
+ * ```ts
+ * import { val } from '@vyke/val'
+ *
+ * const $index = val(1)
+ * //      ^? number
+ * // Type inferred by default or manually
+ * const $counter = val<1 | 2 | 3 | 4>(1)
+ * ```
+ */
+export let val = <T>(defaultValue: T): Val<T> => {
+	let current = defaultValue
+	let listeners = createSet<Listener<any>>()
+
+	let val: Val<T> = {
+		[IS_VAL]: true,
+		notify() {
+			for (let listener of listeners) {
+				if (listener(current) === false) {
+					listeners.delete(listener)
+				}
+			}
+		},
+		watch<T>(listener: Listener<T>) {
+			listeners.add(listener)
+
+			return () => {
+				listeners.delete(listener)
+			}
+		},
+		get() {
+			return current
+		},
+		set(value: T, update = true) {
+			if (value !== current) {
+				current = value
+
+				if (update) {
+					val.notify()
+				}
+			}
+		},
+		use<Y>(getter: Getter<T, Y>) {
+			return computed(getter, val)
+		},
+		prop<K extends keyof T>(key: K) {
+			return computed((value) => value[key], val)
+		},
+	}
+
+	return val
 }

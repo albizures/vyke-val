@@ -124,3 +124,42 @@ describe('isVal', () => {
 		expect(isVal(() => {})).toBe(false)
 	})
 })
+
+describe('use', () => {
+	it('should return a val', () => {
+		const $value = val(1)
+
+		const $plusOne = $value.use((current) => current + 1)
+
+		expect(isVal($plusOne)).toBe(true)
+	})
+
+	it('should return the value', () => {
+		const $value = val(1)
+		const $user = val({ lastName: 'Doe', firstName: 'John' })
+
+		const $plusOne = $value.use((current) => current + 1)
+		const $fullName = $user.use((current) => `${current.firstName} ${current.lastName}`)
+
+		expect($plusOne.get()).toBe(2)
+		expect($fullName.get()).toBe('John Doe')
+	})
+})
+
+describe('prop', () => {
+	it('should return a val', () => {
+		const $user = val({ lastName: 'Doe', firstName: 'John' })
+
+		const $firstName = $user.prop('firstName')
+
+		expect(isVal($firstName)).toBe(true)
+	})
+
+	it('should return the value', () => {
+		const $user = val({ lastName: 'Doe', firstName: 'John' })
+
+		const $firstName = $user.prop('firstName')
+
+		expect($firstName.get()).toBe('John')
+	})
+})
