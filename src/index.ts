@@ -1,6 +1,6 @@
 type Listener<T> = (value: T) => boolean | void
 type Unsubscribe = () => void
-
+const IS_VAL = Symbol('is_val')
 /**
  * Returns the values of a function
  */
@@ -20,6 +20,7 @@ let createSet = <T>() => new Set<T>()
  * A read val is a reactive value that can be watched
  */
 export type ReadVal<T> = {
+	[IS_VAL]: true
 	get: () => T
 	watch: (fn: Listener<T>) => Unsubscribe
 }
@@ -48,6 +49,7 @@ export let val = <T>(defaultValue: T): Val<T> => {
 	let listeners = createSet<Listener<any>>()
 
 	let val: Val<T> = {
+		[IS_VAL]: true,
 		notify() {
 			for (let listener of listeners) {
 				if (listener(current) === false) {
@@ -250,6 +252,7 @@ export let computed = <
 	}, ...vals)
 
 	let val: ReadVal<TOutput> = {
+		[IS_VAL]: true,
 		watch(listener: Listener<TOutput>) {
 			listeners.add(listener)
 
@@ -317,6 +320,7 @@ export let pack = <
 	sync()
 
 	let val: ReadVal<TOutput> = {
+		[IS_VAL]: true,
 		watch(listener: Listener<TOutput >) {
 			listeners.add(listener)
 
@@ -330,4 +334,11 @@ export let pack = <
 	}
 
 	return val
+}
+
+/**
+ * checks whether a value is a val or not
+ */
+export let isVal = (value: any): value is ReadVal<unknown> => {
+	return Boolean(value && value[IS_VAL])
 }

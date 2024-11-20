@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { effect, getValues, val, watch } from '.'
+import { effect, getValues, isVal, val, watch } from '.'
+import { val as fnVal } from './fn'
 
 it('should return the value', () => {
 	const $value = val<number | undefined>(undefined)
@@ -102,5 +103,24 @@ describe('effect', () => {
 		effect(listener, $name, $age)
 
 		expect(listener).toHaveBeenNthCalledWith(1, 'Jose', 15)
+	})
+})
+
+describe('isVal', () => {
+	it('should return true for a val', () => {
+		const $value = val(1)
+		const $fn = fnVal(2)
+
+		expect(isVal($value)).toBe(true)
+		expect(isVal($fn)).toBe(true)
+	})
+
+	it('should return false for a non-val', () => {
+		expect(isVal(1)).toBe(false)
+		expect(isVal({})).toBe(false)
+		expect(isVal([])).toBe(false)
+		expect(isVal(null)).toBe(false)
+		expect(isVal(undefined)).toBe(false)
+		expect(isVal(() => {})).toBe(false)
 	})
 })
