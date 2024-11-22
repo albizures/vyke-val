@@ -1,6 +1,42 @@
-import { describe, expect, it, vi } from 'vitest'
-import { effect, getValues, isVal, val, watch } from '.'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
+import { computed, effect, getValues, isVal, val, watch } from '.'
 import { val as fnVal } from './fn'
+
+describe('types', () => {
+	it('should infer the type', () => {
+		const $name = val('Jose')
+		const $age = val(15)
+
+		const name: string = $name.get()
+		const age: number = $age.get()
+
+		expect(name).toBe('Jose')
+		expect(age).toBe(15)
+	})
+
+	it('should infer the type for computed', () => {
+		const $name = val('Jose')
+		const $age = val(15)
+
+		const $fullName = computed((name, age: number) => {
+			expectTypeOf(name).toEqualTypeOf<string>()
+			expectTypeOf(age).toEqualTypeOf<number>()
+			return `${name} ${age}`
+		}, $name, $age)
+
+		expectTypeOf($fullName.get()).toEqualTypeOf<string>()
+	})
+
+	it('should infer the type for effect', () => {
+		const $name = val('Jose')
+		const $age = val(15)
+
+		effect((name, age: number) => {
+			expectTypeOf(name).toEqualTypeOf<string>()
+			expectTypeOf(age).toEqualTypeOf<number>()
+		}, $name, $age)
+	})
+})
 
 it('should return the value', () => {
 	const $value = val<number | undefined>(undefined)
@@ -58,7 +94,7 @@ describe('subscribe', () => {
 		const $name = val('Miguel')
 		const $age = val(15)
 
-		const listener = vi.fn()
+		const listener = vi.fn((..._args: Array<any>) => {})
 
 		watch(listener, $name, $age)
 

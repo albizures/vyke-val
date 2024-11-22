@@ -1,4 +1,4 @@
-import type { ComputedFn, InferType, ReadVal, Val, ValsFromFn } from './index'
+import type { ComputedFn, InferType, ReadVal, Val } from './index'
 import { val as createVal, computed as valComputed, pack as valPack } from './index'
 
 type ReadFn<T> = {
@@ -66,11 +66,13 @@ export let val = <T>(defaultValue: T): FnVal<T> => {
  * ```
  */
 export let computed = <
-	const TComputedFn extends ComputedFn<any, any>,
+	const TVals extends Array<ReadVal<any>>,
+	const TComputedFn extends ComputedFn<TVals, any>,
+	const TOutput = ReturnType<TComputedFn>,
 >(
 	fn: TComputedFn,
-	...vals: ValsFromFn<TComputedFn>
-): ReadFnVal<ReturnType<TComputedFn>> => {
+	...vals: TVals
+): ReadFnVal<TOutput> => {
 	const val = valComputed(fn, ...vals)
 
 	const computedFn = () => {

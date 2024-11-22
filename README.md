@@ -108,9 +108,6 @@ const $age = val(15)
 const [name, age] = getValues($name, $age)
 ```
 
-### getParams
-Similar to getValues but with a different type signature, mostly useful for internal usage
-
 ### watch
 To watch any changes for one or multiple vals at once
 

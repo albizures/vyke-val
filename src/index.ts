@@ -1,36 +1,29 @@
 type Listener<T> = (value: T) => boolean | void
 type Unsubscribe = () => void
 const IS_VAL = Symbol('is_val')
-/**
- * Returns the values of a function
- */
-export type ParamsAsVals<TParams extends Array<any>> = TParams extends [infer THead]
-	? [ReadVal<THead>]
-	: TParams extends [infer THead, ...infer TTail]
-		? [ReadVal<THead>, ...ParamsAsVals<TTail>]
-		: []
 
-export type ValsFromFn<TFn extends (...args: any) => void> = ParamsAsVals<Parameters<TFn>> extends []
-	? Array<any>
-	: ParamsAsVals<Parameters<TFn>>
+type ValsToValues<TVals extends Array<ReadVal<any>>> = {
+	[K in keyof TVals]: TVals[K] extends ReadVal<infer TValue> ? TValue : never
+}
+type FnFromVals<TVals extends Array<ReadVal<any>>> = (...values: ValsToValues<TVals>) => boolean | void
 
 let createSet = <T>() => new Set<T>()
 
-type Getter<T, Y> = (current: T) => Y
+type Getter<TIn, TOut> = (current: TIn) => TOut
 
 /**
  * A read val is a reactive value that can be watched
  */
-export type ReadVal<T> = {
+export type ReadVal<TValue> = {
 	[IS_VAL]: true
-	get: () => T
-	watch: (fn: Listener<T>) => Unsubscribe
+	get: () => TValue
+	watch: (fn: Listener<TValue>) => Unsubscribe
 	/**
 	 * Returns a new val that is based on the current value
 	 * Similar to computed but with simpler usage
 	 */
-	use: <Y>(getter: Getter<T, Y>) => ReadVal<Y>
-	prop: <K extends keyof T>(key: K) => ReadVal<T[K]>
+	use: <TOut>(getter: Getter<TValue, TOut>) => ReadVal<TOut>
+	prop: <TKey extends keyof TValue>(key: TKey) => ReadVal<TValue[TKey]>
 }
 /**
  * A val is a reactive value that can be watched and updated
@@ -41,11 +34,7 @@ export type Val<T> = ReadVal<T> & {
 }
 
 export type InferType<TVal> = TVal extends ReadVal<infer TValue> ? TValue : never
-export type InferEachType<TVals> = TVals extends [infer THead]
-	? [InferType<THead>]
-	: TVals extends [infer THead, ... infer TTail]
-		? [InferType<THead>, ...InferEachType<TTail>]
-		: never
+export type InferEachType<TVals> = { [K in keyof TVals]: InferType<TVals[K]> }
 
 /**
  * returns the value of a val
@@ -96,13 +85,6 @@ export let getValues = <T extends Array<ReadVal<any>>>(...values: T): InferEachT
 	return values.map(get) as InferEachType<T>
 }
 
-/**
- * Similar to getValues but with a different type signature, mostly useful for internal usage
- */
-export let getParams = <TArgs extends Array<any>>(vals: TArgs): TArgs => {
-	return vals.map(get) as TArgs
-}
-
 export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean | void
 
 /**
@@ -118,10 +100,10 @@ export type Watcher<TValues extends Array<any>> = (...value: TValues) => boolean
  * ```
  */
 export let watch = <
-	const TWatcher extends Watcher<any>,
+	const TVals extends Array<ReadVal<any>>,
 >(
-	watcher: TWatcher,
-	...vals: ValsFromFn<TWatcher>
+	watcher: FnFromVals<TVals>,
+	...vals: TVals
 ): () => void => {
 	let unwatchers: Array<Unsubscribe> = []
 
@@ -135,7 +117,7 @@ export let watch = <
 
 	for (let val of vals) {
 		unwatchers.push(val.watch(() => {
-			if (watcher(...getParams(vals)) === false) {
+			if (watcher(...getValues(...vals)) === false) {
 				unwatch()
 				return false
 			}
@@ -158,18 +140,18 @@ export let watch = <
  * ```
  */
 export let effect = <
-	const TWatcher extends Watcher<any>,
+	const TVals extends Array<ReadVal<any>>,
 >(
-	listener: TWatcher,
-	...vals: ValsFromFn<TWatcher>
+	watcher: FnFromVals<TVals>,
+	...vals: TVals
 ): () => void => {
-	const unwatch = watch(listener, ...vals)
-	listener(...getValues(...vals))
+	const unwatch = watch(watcher, ...vals)
+	watcher(...getValues(...vals))
 
 	return unwatch
 }
 
-export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues) => TOutput
+export type ComputedFn<TVals extends Array<ReadVal<any>>, TOutput> = (...values: ValsToValues<TVals>) => TOutput
 
 /**
  * Create a new val using one or more val to base from, similar to a computed function
@@ -187,16 +169,17 @@ export type ComputedFn<TValues extends Array<any>, TOutput> = (...value: TValues
  * ```
  */
 export let computed = <
-	const TComputedFn extends ComputedFn<any, any>,
+	const TVals extends Array<ReadVal<any>>,
+	const TComputedFn extends ComputedFn<TVals, any>,
+	const TOutput = ReturnType<TComputedFn>,
 >(
 	fn: TComputedFn,
-	...vals: ValsFromFn<TComputedFn>
-): ReadVal<ReturnType<TComputedFn>> => {
-	type TOutput = ReturnType<TComputedFn>
+	...vals: TVals
+): ReadVal<TOutput> => {
 	const listeners = createSet<Listener<TOutput>>()
 	let value = fn(...getValues(...vals))
 
-	effect((...values: Parameters<TComputedFn>) => {
+	effect((...values) => {
 		let newValue = fn(...values)
 		if (newValue !== value) {
 			value = newValue
@@ -221,8 +204,8 @@ export let computed = <
 		get() {
 			return value
 		},
-		use<Y>(getter: Getter<TOutput, Y>) {
-			return computed(getter, val)
+		use<TOut>(getter: Getter<TOutput, TOut>) {
+			return computed<[ReadVal<TOutput>], Getter<TOutput, TOut>>(getter, val)
 		},
 		prop<K extends keyof TOutput>(key: K) {
 			return computed((value) => value[key], val)
@@ -295,8 +278,8 @@ export let pack = <
 			return result as TOutput
 		},
 
-		use<Y>(getter: Getter<TOutput, Y>) {
-			return computed(getter, val)
+		use<TOut>(getter: Getter<TOutput, TOut>) {
+			return computed<[ReadVal<TOutput>], Getter<TOutput, TOut>>(getter, val)
 		},
 
 		prop<K extends keyof TOutput>(key: K) {
@@ -327,11 +310,11 @@ export let isVal = (value: any): value is ReadVal<unknown> => {
  * const $counter = val<1 | 2 | 3 | 4>(1)
  * ```
  */
-export let val = <T>(defaultValue: T): Val<T> => {
+export let val = <TValue>(defaultValue: TValue): Val<TValue> => {
 	let current = defaultValue
 	let listeners = createSet<Listener<any>>()
 
-	let val: Val<T> = {
+	let val: Val<TValue> = {
 		[IS_VAL]: true,
 		notify() {
 			for (let listener of listeners) {
@@ -350,7 +333,7 @@ export let val = <T>(defaultValue: T): Val<T> => {
 		get() {
 			return current
 		},
-		set(value: T, update = true) {
+		set(value: TValue, update = true) {
 			if (value !== current) {
 				current = value
 
@@ -359,10 +342,10 @@ export let val = <T>(defaultValue: T): Val<T> => {
 				}
 			}
 		},
-		use<Y>(getter: Getter<T, Y>) {
-			return computed(getter, val)
+		use<TOut>(getter: Getter<TValue, TOut>) {
+			return computed<[ReadVal<TValue>], Getter<TValue, TOut>>(getter, val)
 		},
-		prop<K extends keyof T>(key: K) {
+		prop<K extends keyof TValue>(key: K) {
 			return computed((value) => value[key], val)
 		},
 	}
